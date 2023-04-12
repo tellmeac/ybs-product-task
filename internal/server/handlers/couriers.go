@@ -29,28 +29,32 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 		return err
 	}
 
-	ctx.JSON(http.StatusOK, couriers)
+	ctx.JSON(http.StatusOK, gin.H{
+		"couriers": couriers,
+		"limit":    queryParams.Limit,
+		"offset":   queryParams.Offset,
+	})
 	return nil
 }
 
 func GetCourier(ctx *gin.Context, r *core.Repository) error {
-	CourierId, err := strconv.ParseInt(ctx.Param("courier_id"), 10, 0)
+	courierId, err := strconv.ParseInt(ctx.Param("courier_id"), 10, 0)
 	if err != nil {
 		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 
-	Courier, err := r.Actions.GetCourier(ctx, CourierId)
+	courier, err := r.Actions.GetCourier(ctx, courierId)
 	if err != nil {
 		return err
 	}
 
-	if Courier == nil {
+	if courier == nil {
 		ctx.JSON(http.StatusNotFound, json.NotFoundResponse{})
 		return nil
 	}
 
-	ctx.JSON(http.StatusOK, Courier)
+	ctx.JSON(http.StatusOK, courier)
 	return nil
 }
 
@@ -87,6 +91,8 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 		return err
 	}
 
-	ctx.JSON(http.StatusOK, couriers)
+	ctx.JSON(http.StatusOK, gin.H{
+		"couriers": couriers,
+	})
 	return nil
 }

@@ -37,7 +37,12 @@ func (a *Actions) ValidateCreateOrders(requests []entities.Order) error {
 }
 
 func (a *Actions) CreateOrders(ctx context.Context, requests []entities.Order) ([]entities.Order, error) {
-	return a.CreateOrders(ctx, requests)
+	return a.storage.Orders.Create(ctx, requests)
+}
+
+func (a *Actions) CompleteOrder(ctx context.Context, requests []entities.CompleteInfo) ([]entities.Order, error) {
+	// TODO: logic for courier, new entities for history and statistic
+	panic("")
 }
 
 func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) error {
