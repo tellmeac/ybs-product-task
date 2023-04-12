@@ -13,8 +13,8 @@ var (
 )
 
 type Courier struct {
-	ID           int          `json:"courier_id"`
+	ID           int64        `json:"courier_id"`
 	Type         CourierType  `json:"courier_type"`
-	Regions      []int        `json:"regions"`
+	Regions      []int32      `json:"regions"`
 	WorkingHours []types.Hour `json:"working_hours"`
 }

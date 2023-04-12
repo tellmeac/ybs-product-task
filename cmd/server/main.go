@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("Parse config failure: %s", err)
 	}
 
-	repository, err := core.NewRepository(cfg)
+	repository, err := core.NewRepository(ctx, cfg)
 	if err != nil {
 		log.Fatalf("Init repository: %s", err)
 	}

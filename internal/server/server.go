@@ -33,6 +33,12 @@ func (app *App) initRoutes() {
 	app.Router = gin.Default()
 
 	app.Router.GET("/orders", app.handlerMapper(handlers.GetOrders))
+	app.Router.POST("/orders", app.handlerMapper(handlers.CreateOrder))
+	app.Router.GET("/orders/:order_id", app.handlerMapper(handlers.GetOrder))
+
+	app.Router.GET("/couriers", app.handlerMapper(handlers.GetCouriers))
+	app.Router.POST("/couriers", app.handlerMapper(handlers.CreateCourier))
+	app.Router.GET("/couriers/:courier_id", app.handlerMapper(handlers.GetCourier))
 }
 
 func (app *App) handlerMapper(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {

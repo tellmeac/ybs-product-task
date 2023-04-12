@@ -6,10 +6,10 @@ import (
 )
 
 type Order struct {
-	ID            int          `json:"order_id"`
-	Weight        int          `json:"weight"`
-	Region        int          `json:"regions"` // NOTE: One region for order.
+	ID            int64        `json:"order_id"`
+	Weight        float64      `json:"weight"`
+	Region        int32        `json:"regions"` // NOTE: One region for order.
 	DeliveryHours []types.Hour `json:"delivery_hours"`
-	Cost          int          `json:"cost"`
+	Cost          int32        `json:"cost"`
 	CompletedTime *time.Time   `json:"completed_time"`
 }
