@@ -1,8 +1,12 @@
----
 openapi: 3.0.1
 info:
   title: Yandex Lavka
   version: '1.0'
+servers:
+  - url: http://{hostname}
+    variables:
+      hostname:
+        default: localhost:8080
 paths:
   "/orders":
     get:

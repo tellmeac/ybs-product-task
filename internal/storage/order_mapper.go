@@ -13,7 +13,7 @@ type OrderMapper struct {
 
 func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities.Order, error) {
 	query, _, err := squirrel.Select("*").From("orders").
-		Limit(limit).Offset(offset).ToSql()
+		PlaceholderFormat(squirrel.Dollar).Limit(limit).Offset(offset).ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -59,11 +59,15 @@ func (m *OrderMapper) Get(ctx context.Context, id int64) (*entities.Order, error
 }
 
 func (m *OrderMapper) Create(ctx context.Context, orders []entities.Order) ([]entities.Order, error) {
-	builder := squirrel.Insert("orders").Columns("weight", "region", "delivery_hours", "cost")
+	builder := squirrel.Insert("orders").
+		Columns("weight", "region", "delivery_hours", "cost").
+		PlaceholderFormat(squirrel.Dollar).
+		Suffix("returning id")
+
 	for i := range orders {
-		builder.Values(orders[i].Weight, orders[i].Region, orders[i].DeliveryHours, orders[i].Cost)
+		builder = builder.Values(orders[i].Weight, orders[i].Region, orders[i].DeliveryHours, orders[i].Cost)
 	}
-	query, args, err := builder.Suffix("returning id").ToSql()
+	query, args, err := builder.ToSql()
 	if err != nil {
 		return nil, err
 	}

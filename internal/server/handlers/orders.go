@@ -20,7 +20,7 @@ func GetOrders(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindQuery(&queryParams); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 
@@ -36,7 +36,7 @@ func GetOrders(ctx *gin.Context, r *core.Repository) error {
 func GetOrder(ctx *gin.Context, r *core.Repository) error {
 	orderId, err := strconv.ParseInt(ctx.Param("order_id"), 10, 0)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 
@@ -57,15 +57,15 @@ func GetOrder(ctx *gin.Context, r *core.Repository) error {
 func CreateOrder(ctx *gin.Context, r *core.Repository) error {
 	var request struct {
 		Orders []struct {
-			Weight        float64      `json:"weight"`
-			Region        int32        `json:"regions"` // NOTE: One region for order.
-			DeliveryHours []types.Hour `json:"delivery_hours"`
-			Cost          int32        `json:"cost"`
+			Weight        float64          `json:"weight"`
+			Region        int32            `json:"regions"` // NOTE: One region for order.
+			DeliveryHours []types.Interval `json:"delivery_hours"`
+			Cost          int32            `json:"cost"`
 		} `json:"orders"`
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 
@@ -77,6 +77,11 @@ func CreateOrder(ctx *gin.Context, r *core.Repository) error {
 			DeliveryHours: request.Orders[i].DeliveryHours,
 			Cost:          request.Orders[i].Cost,
 		})
+	}
+
+	if err := r.Actions.ValidateCreateOrders(createOrders); err != nil {
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		return nil
 	}
 
 	orders, err := r.Actions.CreateOrders(ctx, createOrders)

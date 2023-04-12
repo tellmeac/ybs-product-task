@@ -13,7 +13,7 @@ type CourierMapper struct {
 
 func (m CourierMapper) All(ctx context.Context, limit uint64, offset uint64) ([]entities.Courier, error) {
 	query, _, err := squirrel.Select("*").From("couriers").
-		Limit(limit).Offset(offset).ToSql()
+		PlaceholderFormat(squirrel.Dollar).Limit(limit).Offset(offset).ToSql()
 	if err != nil {
 		return nil, err
 	}
@@ -59,11 +59,14 @@ func (m CourierMapper) Get(ctx context.Context, id int64) (*entities.Courier, er
 }
 
 func (m CourierMapper) Create(ctx context.Context, couriers []entities.Courier) ([]entities.Courier, error) {
-	builder := squirrel.Insert("couriers").Columns("courier_type", "regions", "working_hours")
+	builder := squirrel.Insert("couriers").
+		Columns("courier_type", "regions", "working_hours").
+		PlaceholderFormat(squirrel.Dollar).
+		Suffix("RETURNING id")
 	for i := range couriers {
-		builder.Values(couriers[i].Type, couriers[i].Regions, couriers[i].WorkingHours)
+		builder = builder.Values(couriers[i].Type, couriers[i].Regions, couriers[i].WorkingHours)
 	}
-	query, args, err := builder.Suffix("returning id").ToSql()
+	query, args, err := builder.ToSql()
 	if err != nil {
 		return nil, err
 	}

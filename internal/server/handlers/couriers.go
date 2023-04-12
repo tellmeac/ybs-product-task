@@ -20,7 +20,7 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindQuery(&queryParams); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 
@@ -36,7 +36,7 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 func GetCourier(ctx *gin.Context, r *core.Repository) error {
 	CourierId, err := strconv.ParseInt(ctx.Param("courier_id"), 10, 0)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 
@@ -59,12 +59,12 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 		Couriers []struct {
 			Type         entities.CourierType `json:"courier_type"`
 			Regions      []int32              `json:"regions"`
-			WorkingHours []types.Hour         `json:"working_hours"`
+			WorkingHours []types.Interval     `json:"working_hours"`
 		} `json:"Couriers"`
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 
@@ -77,8 +77,8 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 		})
 	}
 
-	if r.Actions.ValidateCreateCouriers(createCouriers) {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+	if err := r.Actions.ValidateCreateCouriers(createCouriers); err != nil {
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
 		return nil
 	}
 

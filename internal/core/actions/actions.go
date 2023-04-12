@@ -2,6 +2,9 @@ package actions
 
 import (
 	"context"
+	"errors"
+	"fmt"
+	"yandex-team.ru/bstask/internal/core/actions/courier"
 	"yandex-team.ru/bstask/internal/core/entities"
 	"yandex-team.ru/bstask/internal/storage"
 )
@@ -24,26 +27,31 @@ func (a *Actions) GetOrder(ctx context.Context, id int64) (*entities.Order, erro
 	return a.storage.Orders.Get(ctx, id)
 }
 
-func (a *Actions) ValidateCreateOrders(requests []entities.Order) bool {
-	// TODO: validation for request: Weight, DeliveryHours, Cost
-	return true
+func (a *Actions) ValidateCreateOrders(requests []entities.Order) error {
+	// TODO: validation for request: Weight, DeliveryHours, Cost, Region
+	if len(requests) == 0 {
+		return errors.New("must provide at least one request item")
+	}
+
+	return nil
 }
 
 func (a *Actions) CreateOrders(ctx context.Context, requests []entities.Order) ([]entities.Order, error) {
 	return a.CreateOrders(ctx, requests)
 }
 
-func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) bool {
-	// TODO: better validation for request: WorkingHours, Regions
+func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) error {
+	if len(requests) == 0 {
+		return errors.New("must provide at least one request item")
+	}
 
 	for i := range requests {
-		for _, t := range entities.CourierTypes {
-			if requests[i].Type != t {
-				return false
-			}
+		if err := courier.Validate(&requests[i]); err != nil {
+			return fmt.Errorf("validate %d's request: %w", i, err)
 		}
 	}
-	return true
+
+	return nil
 }
 
 func (a *Actions) CreateCouriers(ctx context.Context, requests []entities.Courier) ([]entities.Courier, error) {
