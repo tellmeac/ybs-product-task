@@ -3,6 +3,7 @@ package server
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	"yandex-team.ru/bstask/internal/core"
 	"yandex-team.ru/bstask/internal/pkg/web"
 	"yandex-team.ru/bstask/internal/server/handlers"
@@ -43,6 +44,8 @@ func (app *App) initRoutes() {
 
 func (app *App) handlerMapper(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		_ = handler(ctx, app.Repository)
+		if err := handler(ctx, app.Repository); err != nil {
+			_ = ctx.AbortWithError(http.StatusInternalServerError, err)
+		}
 	}
 }

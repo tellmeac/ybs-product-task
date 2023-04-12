@@ -6,6 +6,8 @@ import (
 
 type CourierType string
 
+var CourierTypes = []CourierType{Foot, Bike, Auto}
+
 var (
 	Foot CourierType = "FOOT"
 	Bike CourierType = "BIKE"

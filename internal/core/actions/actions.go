@@ -24,8 +24,26 @@ func (a *Actions) GetOrder(ctx context.Context, id int64) (*entities.Order, erro
 	return a.storage.Orders.Get(ctx, id)
 }
 
+func (a *Actions) ValidateCreateOrders(requests []entities.Order) bool {
+	// TODO: validation for request: Weight, DeliveryHours, Cost
+	return true
+}
+
 func (a *Actions) CreateOrders(ctx context.Context, requests []entities.Order) ([]entities.Order, error) {
 	return a.CreateOrders(ctx, requests)
+}
+
+func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) bool {
+	// TODO: better validation for request: WorkingHours, Regions
+
+	for i := range requests {
+		for _, t := range entities.CourierTypes {
+			if requests[i].Type != t {
+				return false
+			}
+		}
+	}
+	return true
 }
 
 func (a *Actions) CreateCouriers(ctx context.Context, requests []entities.Courier) ([]entities.Courier, error) {

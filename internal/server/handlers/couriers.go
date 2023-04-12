@@ -26,7 +26,7 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 
 	couriers, err := r.Actions.GetCouriers(ctx, queryParams.Limit, queryParams.Offset)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	ctx.JSON(http.StatusOK, couriers)
@@ -42,7 +42,7 @@ func GetCourier(ctx *gin.Context, r *core.Repository) error {
 
 	Courier, err := r.Actions.GetCourier(ctx, CourierId)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if Courier == nil {
@@ -77,9 +77,14 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 		})
 	}
 
+	if r.Actions.ValidateCreateCouriers(createCouriers) {
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
+		return nil
+	}
+
 	couriers, err := r.Actions.CreateCouriers(ctx, createCouriers)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	ctx.JSON(http.StatusOK, couriers)

@@ -26,7 +26,7 @@ func GetOrders(ctx *gin.Context, r *core.Repository) error {
 
 	orders, err := r.Actions.GetOrders(ctx, queryParams.Limit, queryParams.Offset)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	ctx.JSON(http.StatusOK, orders)
@@ -42,7 +42,7 @@ func GetOrder(ctx *gin.Context, r *core.Repository) error {
 
 	order, err := r.Actions.GetOrder(ctx, orderId)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	if order == nil {
@@ -81,7 +81,7 @@ func CreateOrder(ctx *gin.Context, r *core.Repository) error {
 
 	orders, err := r.Actions.CreateOrders(ctx, createOrders)
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	ctx.JSON(http.StatusOK, orders)
