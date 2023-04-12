@@ -1,0 +1,4 @@
+server:
+  listen: ":8080"
+storage:
+  connectionStr: "user=postgres password=postgres host=localhost port=5432 dbname=Lavka sslmode=disable pool_max_conns=10"

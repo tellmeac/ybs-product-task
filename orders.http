@@ -1,0 +1,3 @@
+### get orders
+GET localhost:8080/orders
+Accept: application/json
