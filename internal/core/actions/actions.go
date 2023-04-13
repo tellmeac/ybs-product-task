@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"yandex-team.ru/bstask/internal/core/actions/courier"
+	"yandex-team.ru/bstask/internal/core/actions/order"
 	"yandex-team.ru/bstask/internal/core/entities"
 	"yandex-team.ru/bstask/internal/storage"
 )
@@ -28,9 +29,14 @@ func (a *Actions) GetOrder(ctx context.Context, id int64) (*entities.Order, erro
 }
 
 func (a *Actions) ValidateCreateOrders(requests []entities.Order) error {
-	// TODO: validation for request: Weight, DeliveryHours, Cost, Region
 	if len(requests) == 0 {
 		return errors.New("must provide at least one request item")
+	}
+
+	for i := range requests {
+		if err := order.Validate(&requests[i]); err != nil {
+			return fmt.Errorf("validate %d's request: %w", i, err)
+		}
 	}
 
 	return nil

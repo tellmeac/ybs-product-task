@@ -64,7 +64,7 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 			Type         entities.CourierType `json:"courier_type"`
 			Regions      []int32              `json:"regions"`
 			WorkingHours []types.Interval     `json:"working_hours"`
-		} `json:"Couriers"`
+		} `json:"couriers"`
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
