@@ -48,3 +48,7 @@ func (interval *Interval) UnmarshalJSON(bytes []byte) error {
 
 	return nil
 }
+
+func Intersects(a, b []Interval) bool {
+	panic("implement me")
+}

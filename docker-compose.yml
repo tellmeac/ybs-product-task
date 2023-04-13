@@ -1,20 +1,20 @@
 version: "3.9"
 
 services:
-#  app:
-#    container_name: app
-#    build:
-#      context: 2403-tellmeac-gmail.com-89
-#      args:
-#        LOCAL: "true"
-#    ports:
-#      - "8080:8080"
-#    depends_on:
-#      - db
-#    links:
-#      - db
-#    networks:
-#      - enrollment
+  app:
+    container_name: app
+    build:
+      context: 2403-tellmeac-gmail.com-89
+      args:
+        LOCAL: "true"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    links:
+      - db
+    networks:
+      - enrollment
 
   db:
     container_name: db
@@ -25,9 +25,9 @@ services:
       - POSTGRES_DB=Lavka
     ports:
       - "5432:5432"
-#    networks:
-#      - enrollment
+    networks:
+      - enrollment
 
-#networks:
-#  enrollment:
-#    driver: bridge
+networks:
+  enrollment:
+    driver: bridge
