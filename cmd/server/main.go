@@ -17,7 +17,7 @@ func main() {
 
 	cfg, err := core.ParseConfig(loader)
 	if err != nil {
-		log.Fatalf("Parse config failure: %s", err)
+		log.Fatalf("Failed to parse config: %s", err)
 	}
 
 	repository, err := core.NewRepository(ctx, cfg)
