@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/samber/lo"
 	"yandex-team.ru/bstask/internal/core/entities"
+	"yandex-team.ru/bstask/internal/pkg/types"
 )
 
 func ValidateCourier(courier *entities.Courier) error {
@@ -16,7 +17,7 @@ func ValidateCourier(courier *entities.Courier) error {
 		return err
 	}
 
-	if err := validateCourierHours(courier); err != nil {
+	if err := validateCourierWorkingHours(courier); err != nil {
 		return err
 	}
 
@@ -46,6 +47,14 @@ func validateCourierRegions(courier *entities.Courier) error {
 	return nil
 }
 
-func validateCourierHours(courier *entities.Courier) error {
-	return nil // TODO: implement me
+func validateCourierWorkingHours(courier *entities.Courier) error {
+	if len(courier.WorkingHours) == 0 {
+		return errors.New("must provide at least one delivery_hours value")
+	}
+
+	if collide := types.IntervalsCollide(courier.WorkingHours...); collide {
+		return errors.New("invalid delivery hours with collisions")
+	}
+
+	return nil
 }
