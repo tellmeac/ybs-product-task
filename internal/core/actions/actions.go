@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/samber/lo"
 	"yandex-team.ru/bstask/internal/core/actions/courier"
 	"yandex-team.ru/bstask/internal/core/actions/order"
 	"yandex-team.ru/bstask/internal/core/entities"
@@ -47,7 +48,20 @@ func (a *Actions) CreateOrders(ctx context.Context, requests []entities.Order) (
 }
 
 func (a *Actions) CompleteOrder(ctx context.Context, requests []entities.CompleteInfo) ([]entities.Order, error) {
-	return nil, nil
+	orders := lo.Map(requests, func(r entities.CompleteInfo, _ int) entities.Order {
+		return entities.Order{
+			ID:            r.OrderID,
+			CompletedTime: &r.CompleteTime,
+			CourierID:     &r.CourierID,
+		}
+	})
+
+	err := a.storage.Orders.Update(ctx, orders)
+	if err != nil {
+		return nil, err
+	}
+
+	return orders, nil
 }
 
 func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) error {

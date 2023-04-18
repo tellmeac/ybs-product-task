@@ -75,6 +75,17 @@ func (m *OrderMapper) Insert(ctx context.Context, orders []entities.Order) ([]en
 	return orders, nil
 }
 
+func (m *OrderMapper) Update(ctx context.Context, orders []entities.Order) error {
+	err := m.Storage.Database.Tx(ctx, func(ctx context.Context) error {
+		// update only updatable fields (complete_time, courier_id) with returning other fields
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func toOrder(rows pgx.Rows) (entities.Order, error) {
 	var order entities.Order
 	err := rows.Scan(&order.ID, &order.Weight, &order.Region,
