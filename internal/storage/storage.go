@@ -3,6 +3,7 @@ package storage
 import (
 	"context"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"yandex-team.ru/bstask/internal/pkg/pgdb"
 )
 
 type Config struct {
@@ -10,8 +11,8 @@ type Config struct {
 }
 
 type Storage struct {
-	Config Config
-	Pool   *pgxpool.Pool
+	Config   Config
+	Database *pgdb.Database
 
 	Couriers CourierMapper
 	Orders   OrderMapper
@@ -24,10 +25,11 @@ func NewStorage(ctx context.Context, cfg Config) (*Storage, error) {
 		Config: cfg,
 	}
 
-	storage.Pool, err = pgxpool.New(ctx, cfg.ConnectionStr)
+	pool, err := pgxpool.New(ctx, cfg.ConnectionStr)
 	if err != nil {
 		return nil, err
 	}
+	storage.Database = pgdb.NewDatabase(pool)
 
 	storage.Couriers = CourierMapper{Storage: storage}
 	storage.Orders = OrderMapper{Storage: storage}

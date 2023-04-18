@@ -2,7 +2,7 @@ package storage
 
 import (
 	"context"
-	"github.com/Masterminds/squirrel"
+	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"yandex-team.ru/bstask/internal/core/entities"
 )
@@ -12,13 +12,8 @@ type OrderMapper struct {
 }
 
 func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities.Order, error) {
-	query, _, err := squirrel.Select("*").From("orders").
-		PlaceholderFormat(squirrel.Dollar).Limit(limit).Offset(offset).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := m.Storage.Pool.Query(ctx, query)
+	rows, err := m.Storage.Database.Select(ctx,
+		sq.Select("*").From("orders").Limit(limit).Offset(offset))
 	if err != nil {
 		return nil, err
 	}
@@ -36,16 +31,11 @@ func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities
 }
 
 func (m *OrderMapper) Get(ctx context.Context, id int64) (*entities.Order, error) {
-	query, args, err := squirrel.Select("*").From("orders").
-		PlaceholderFormat(squirrel.Dollar).
-		Where(squirrel.Eq{
-			"id": id,
-		}).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	rows, err := m.Storage.Pool.Query(ctx, query, args...)
+	rows, err := m.Storage.Database.Select(ctx,
+		sq.Select("*").From("orders").
+			Where(sq.Eq{
+				"id": id,
+			}))
 	if err != nil {
 		return nil, err
 	}
@@ -58,21 +48,17 @@ func (m *OrderMapper) Get(ctx context.Context, id int64) (*entities.Order, error
 	return &result, err
 }
 
-func (m *OrderMapper) Put(ctx context.Context, orders []entities.Order) ([]entities.Order, error) {
-	builder := squirrel.Insert("orders").
+func (m *OrderMapper) Insert(ctx context.Context, orders []entities.Order) ([]entities.Order, error) {
+	builder := sq.Insert("orders").
 		Columns("weight", "region", "delivery_hours", "cost").
-		PlaceholderFormat(squirrel.Dollar).
+		PlaceholderFormat(sq.Dollar).
 		Suffix("RETURNING id")
 
 	for i := range orders {
 		builder = builder.Values(orders[i].Weight, orders[i].Region, orders[i].DeliveryHours, orders[i].Cost)
 	}
-	query, args, err := builder.ToSql()
-	if err != nil {
-		return nil, err
-	}
 
-	rows, err := m.Storage.Pool.Query(ctx, query, args...)
+	rows, err := m.Storage.Database.Insert(ctx, builder)
 	if err != nil {
 		return nil, err
 	}
