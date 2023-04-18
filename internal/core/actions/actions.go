@@ -43,12 +43,25 @@ func (a *Actions) ValidateCreateOrders(requests []entities.Order) error {
 }
 
 func (a *Actions) CreateOrders(ctx context.Context, requests []entities.Order) ([]entities.Order, error) {
-	return a.storage.Orders.Create(ctx, requests)
+	return a.storage.Orders.Put(ctx, requests)
 }
 
 func (a *Actions) CompleteOrder(ctx context.Context, requests []entities.CompleteInfo) ([]entities.Order, error) {
-	// TODO: logic for courier, new entities for history and statistic
-	panic("")
+	// Plan:
+	// 1. Update each order and validate it
+
+	tx, err := a.storage.Pool.Begin(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO
+
+	if err = tx.Commit(ctx); err != nil {
+		return nil, err
+	}
+
+	return nil, nil
 }
 
 func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) error {
@@ -66,7 +79,7 @@ func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) error {
 }
 
 func (a *Actions) CreateCouriers(ctx context.Context, requests []entities.Courier) ([]entities.Courier, error) {
-	return a.storage.Couriers.Create(ctx, requests)
+	return a.storage.Couriers.Put(ctx, requests)
 }
 
 func (a *Actions) GetCouriers(ctx context.Context, limit uint64, offset uint64) ([]entities.Courier, error) {

@@ -92,3 +92,21 @@ func CreateOrder(ctx *gin.Context, r *core.Repository) error {
 	ctx.JSON(http.StatusOK, orders)
 	return nil
 }
+
+func CompleteOrder(ctx *gin.Context, r *core.Repository) error {
+	var request struct {
+		CompleteInfo []entities.CompleteInfo `json:"complete_info"`
+	}
+	if err := ctx.BindJSON(&request); err != nil {
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		return nil
+	}
+
+	orders, err := r.Actions.CompleteOrder(ctx, request.CompleteInfo)
+	if err != nil {
+		return err
+	}
+
+	ctx.JSON(http.StatusOK, orders)
+	return nil
+}

@@ -58,7 +58,7 @@ func (m CourierMapper) Get(ctx context.Context, id int64) (*entities.Courier, er
 	return &result, err
 }
 
-func (m CourierMapper) Create(ctx context.Context, couriers []entities.Courier) ([]entities.Courier, error) {
+func (m CourierMapper) Put(ctx context.Context, couriers []entities.Courier) ([]entities.Courier, error) {
 	builder := squirrel.Insert("couriers").
 		Columns("courier_type", "regions", "working_hours").
 		PlaceholderFormat(squirrel.Dollar).
@@ -76,9 +76,7 @@ func (m CourierMapper) Create(ctx context.Context, couriers []entities.Courier) 
 		return nil, err
 	}
 
-	var (
-		ind, id int64
-	)
+	var ind, id int64
 	for rows.Next() {
 		if err := rows.Scan(&id); err != nil {
 			return nil, err

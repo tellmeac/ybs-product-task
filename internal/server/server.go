@@ -33,16 +33,17 @@ func (app *App) Start(ctx context.Context) error {
 func (app *App) initRoutes() {
 	app.Router = gin.Default()
 
-	app.Router.GET("/orders", app.handlerMapper(handlers.GetOrders))
-	app.Router.POST("/orders", app.handlerMapper(handlers.CreateOrder))
-	app.Router.GET("/orders/:order_id", app.handlerMapper(handlers.GetOrder))
+	app.Router.GET("/orders", app.mappedHandler(handlers.GetOrders))
+	app.Router.POST("/orders", app.mappedHandler(handlers.CreateOrder))
+	app.Router.GET("/orders/:order_id", app.mappedHandler(handlers.GetOrder))
+	app.Router.POST("/orders/complete", app.mappedHandler(handlers.CompleteOrder))
 
-	app.Router.GET("/couriers", app.handlerMapper(handlers.GetCouriers))
-	app.Router.POST("/couriers", app.handlerMapper(handlers.CreateCourier))
-	app.Router.GET("/couriers/:courier_id", app.handlerMapper(handlers.GetCourier))
+	app.Router.GET("/couriers", app.mappedHandler(handlers.GetCouriers))
+	app.Router.POST("/couriers", app.mappedHandler(handlers.CreateCourier))
+	app.Router.GET("/couriers/:courier_id", app.mappedHandler(handlers.GetCourier))
 }
 
-func (app *App) handlerMapper(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {
+func (app *App) mappedHandler(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		if err := handler(ctx, app.Repository); err != nil {
 			_ = ctx.AbortWithError(http.StatusInternalServerError, err)

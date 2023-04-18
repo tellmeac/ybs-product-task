@@ -58,11 +58,11 @@ func (m *OrderMapper) Get(ctx context.Context, id int64) (*entities.Order, error
 	return &result, err
 }
 
-func (m *OrderMapper) Create(ctx context.Context, orders []entities.Order) ([]entities.Order, error) {
+func (m *OrderMapper) Put(ctx context.Context, orders []entities.Order) ([]entities.Order, error) {
 	builder := squirrel.Insert("orders").
 		Columns("weight", "region", "delivery_hours", "cost").
 		PlaceholderFormat(squirrel.Dollar).
-		Suffix("returning id")
+		Suffix("RETURNING id")
 
 	for i := range orders {
 		builder = builder.Values(orders[i].Weight, orders[i].Region, orders[i].DeliveryHours, orders[i].Cost)
@@ -77,9 +77,7 @@ func (m *OrderMapper) Create(ctx context.Context, orders []entities.Order) ([]en
 		return nil, err
 	}
 
-	var (
-		ind, id int64
-	)
+	var ind, id int64
 	for rows.Next() {
 		if err := rows.Scan(&id); err != nil {
 			return nil, err
@@ -93,7 +91,8 @@ func (m *OrderMapper) Create(ctx context.Context, orders []entities.Order) ([]en
 
 func toOrder(rows pgx.Rows) (entities.Order, error) {
 	var order entities.Order
-	err := rows.Scan(&order.ID, &order.Weight, &order.Region, &order.DeliveryHours, &order.Cost, &order.CompletedTime)
+	err := rows.Scan(&order.ID, &order.Weight, &order.Region,
+		&order.DeliveryHours, &order.Cost, &order.CompletedTime, &order.CourierID)
 	if err != nil {
 		return entities.Order{}, err
 	}
