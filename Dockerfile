@@ -6,7 +6,9 @@ WORKDIR /usr/src/app
 #COPY src/go.mod src/go.sum ./
 #RUN go mod download && go mod verify
 
-COPY src .
+COPY ./cmd .
+COPY ./internal .
+COPY ./migrations .
 RUN mkdir -p /usr/local/bin/
 RUN go mod tidy
 RUN go build -v -o /usr/local/bin/app
