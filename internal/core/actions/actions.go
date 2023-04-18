@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"yandex-team.ru/bstask/internal/core/actions/validators"
 	"yandex-team.ru/bstask/internal/core/entities"
 	"yandex-team.ru/bstask/internal/storage"
 )
@@ -32,7 +33,7 @@ func (a *Actions) ValidateCreateOrders(requests []entities.Order) error {
 	}
 
 	for i := range requests {
-		if err := ValidateOrder(&requests[i]); err != nil {
+		if err := validators.ValidateOrder(&requests[i]); err != nil {
 			return fmt.Errorf("validate %d's request: %w", i, err)
 		}
 	}
@@ -99,7 +100,7 @@ func (a *Actions) ValidateCreateCouriers(requests []entities.Courier) error {
 	}
 
 	for i := range requests {
-		if err := ValidateCourier(&requests[i]); err != nil {
+		if err := validators.ValidateCourier(&requests[i]); err != nil {
 			return fmt.Errorf("validate %d's request: %w", i, err)
 		}
 	}
