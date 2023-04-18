@@ -4,6 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"time"
 	"yandex-team.ru/bstask/internal/core"
 	"yandex-team.ru/bstask/internal/core/entities"
 	"yandex-team.ru/bstask/internal/pkg/types"
@@ -94,5 +95,30 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 	ctx.JSON(http.StatusOK, gin.H{
 		"couriers": couriers,
 	})
+	return nil
+}
+
+func GetCourierMetaInfo(ctx *gin.Context, r *core.Repository) error {
+	courierId, err := strconv.ParseInt(ctx.Param("courier_id"), 10, 0)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		return nil
+	}
+
+	var queryParams struct {
+		StartDate time.Time `form:"startDate" time_format:"2006-01-02"`
+		EndDate   time.Time `form:"endDate" time_format:"2006-01-02" binding:"gtfield=StartDate"`
+	}
+	if err := ctx.BindQuery(&queryParams); err != nil {
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		return nil
+	}
+
+	result, err := r.Actions.GetCourierMetaInfo(ctx, courierId, queryParams.StartDate, queryParams.EndDate)
+	if err != nil {
+		return err
+	}
+
+	ctx.JSON(http.StatusOK, result)
 	return nil
 }

@@ -48,7 +48,9 @@ func (m *CourierMapper) All(ctx context.Context, limit uint64, offset uint64) ([
 }
 
 func (m *CourierMapper) Get(ctx context.Context, id int64) (*entities.Courier, error) {
-	result, err := m.executeQuery(ctx, sq.Select("*").From("couriers").Where(sq.Eq{"id": id}))
+	result, err := m.executeQuery(ctx, sq.Select("*").From("couriers").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"id": id}))
 	if err != nil {
 		return nil, err
 	}
@@ -61,9 +63,9 @@ func (m *CourierMapper) Get(ctx context.Context, id int64) (*entities.Courier, e
 
 func (m *CourierMapper) Insert(ctx context.Context, params CourierCreateParams) (*entities.Courier, error) {
 	result, err := m.executeQuery(ctx, sq.Insert("couriers").
+		PlaceholderFormat(sq.Dollar).
 		Columns("courier_type", "regions", "working_hours").
 		Values(params.Type, params.Regions, params.WorkingHours).
-		PlaceholderFormat(sq.Dollar).
 		Suffix("RETURNING *"))
 	if err != nil {
 		return nil, err

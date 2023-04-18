@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"time"
+	"yandex-team.ru/bstask/internal/core/actions/meta"
 	"yandex-team.ru/bstask/internal/core/actions/validators"
 	"yandex-team.ru/bstask/internal/core/entities"
 	"yandex-team.ru/bstask/internal/storage"
@@ -81,6 +83,9 @@ func (a *Actions) CompleteOrder(ctx context.Context, requests []entities.Complet
 			if err != nil {
 				return err
 			}
+			if order == nil {
+				return fmt.Errorf("failed to complete order %d: %w", r.OrderID, ErrCompleteOrder)
+			}
 
 			result = append(result, *order)
 		}
@@ -140,4 +145,37 @@ func (a *Actions) GetCouriers(ctx context.Context, limit uint64, offset uint64) 
 
 func (a *Actions) GetCourier(ctx context.Context, id int64) (*entities.Courier, error) {
 	return a.storage.Couriers.Get(ctx, id)
+}
+
+func (a *Actions) GetCourierMetaInfo(
+	ctx context.Context, courierId int64, from, to time.Time,
+) (*entities.CourierMeta, error) {
+	var result *entities.CourierMeta
+	err := a.storage.Database.ReadonlyTx(ctx, func(ctx context.Context) error {
+		courier, err := a.storage.Couriers.Get(ctx, courierId)
+		if err != nil {
+			return err
+		}
+		if courier == nil {
+			return nil
+		}
+
+		orders, err := a.storage.Orders.Find(ctx, storage.OrderFindParams{
+			From:      from,
+			To:        to,
+			CourierID: courier.ID,
+		})
+		if err != nil {
+			return err
+		}
+
+		result = meta.GetCourierMeta(courier, orders, from, to)
+
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

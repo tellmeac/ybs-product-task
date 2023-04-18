@@ -49,6 +49,21 @@ func (m *OrderMapper) executeQuery(ctx context.Context, query sq.Sqlizer) ([]ent
 	return result, nil
 }
 
+type OrderFindParams struct {
+	From, To  time.Time
+	CourierID int64
+}
+
+func (m *OrderMapper) Find(ctx context.Context, params OrderFindParams) ([]entities.Order, error) {
+	return m.executeQuery(ctx, sq.Select("*").From("orders").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.And{
+			sq.Eq{"courier_id": params.CourierID},
+			sq.LtOrEq{"completed_time": params.To},
+			sq.GtOrEq{"completed_time": params.From},
+		}))
+}
+
 func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities.Order, error) {
 	return m.executeQuery(ctx, sq.Select("*").From("orders").
 		PlaceholderFormat(sq.Dollar).
@@ -56,7 +71,9 @@ func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities
 }
 
 func (m *OrderMapper) Get(ctx context.Context, id int64) (*entities.Order, error) {
-	result, err := m.executeQuery(ctx, sq.Select("*").From("orders").Where(sq.Eq{"id": id}))
+	result, err := m.executeQuery(ctx, sq.Select("*").From("orders").
+		PlaceholderFormat(sq.Dollar).
+		Where(sq.Eq{"id": id}))
 	if err != nil {
 		return nil, err
 	}
@@ -85,12 +102,12 @@ func (m *OrderMapper) Insert(ctx context.Context, params OrderCreateParams) (*en
 
 func (m *OrderMapper) Save(ctx context.Context, params OrderSaveParams) (*entities.Order, error) {
 	result, err := m.executeQuery(ctx, sq.Update("orders").
+		PlaceholderFormat(sq.Dollar).
 		Where(sq.Eq{
 			"id":         params.OrderID,
 			"courier_id": params.CourierID, // TODO: what about complete time assertion ? (idempotency)
 		}).
-		Set("complete_time", params.CompleteTime).
-		PlaceholderFormat(sq.Dollar).
+		Set("completed_time", params.CompleteTime).
 		Suffix("RETURNING *"))
 	if err != nil {
 		return nil, err

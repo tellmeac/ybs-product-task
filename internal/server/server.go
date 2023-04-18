@@ -41,6 +41,7 @@ func (app *App) initRoutes() {
 	app.Router.GET("/couriers", app.mappedHandler(handlers.GetCouriers))
 	app.Router.POST("/couriers", app.mappedHandler(handlers.CreateCourier))
 	app.Router.GET("/couriers/:courier_id", app.mappedHandler(handlers.GetCourier))
+	app.Router.GET("/couriers/meta-info/:courier_id", app.mappedHandler(handlers.GetCourierMetaInfo))
 }
 
 func (app *App) mappedHandler(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {

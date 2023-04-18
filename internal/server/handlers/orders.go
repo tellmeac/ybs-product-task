@@ -1,10 +1,12 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
 	"yandex-team.ru/bstask/internal/core"
+	"yandex-team.ru/bstask/internal/core/actions"
 	"yandex-team.ru/bstask/internal/core/entities"
 	"yandex-team.ru/bstask/internal/pkg/types"
 	"yandex-team.ru/bstask/internal/pkg/web/json"
@@ -104,6 +106,11 @@ func CompleteOrder(ctx *gin.Context, r *core.Repository) error {
 
 	orders, err := r.Actions.CompleteOrder(ctx, request.CompleteInfo)
 	if err != nil {
+		if errors.Is(err, actions.ErrCompleteOrder) {
+			ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+			return nil
+		}
+
 		return err
 	}
 

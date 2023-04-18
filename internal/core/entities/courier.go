@@ -6,12 +6,12 @@ import (
 
 type CourierType string
 
-var CourierTypes = []CourierType{Foot, Bike, Auto}
+var CourierTypes = []CourierType{FootCourier, BikeCourier, AutoCourier}
 
 var (
-	Foot CourierType = "FOOT"
-	Bike CourierType = "BIKE"
-	Auto CourierType = "AUTO"
+	FootCourier CourierType = "FOOT"
+	BikeCourier CourierType = "BIKE"
+	AutoCourier CourierType = "AUTO"
 )
 
 type Courier struct {
@@ -19,4 +19,13 @@ type Courier struct {
 	Type         CourierType      `json:"courier_type"`
 	Regions      []int32          `json:"regions"`
 	WorkingHours []types.Interval `json:"working_hours"`
+}
+
+type CourierMeta struct {
+	ID           int64            `json:"courier_id"`
+	Type         CourierType      `json:"courier_type"`
+	Regions      []int32          `json:"regions"`
+	WorkingHours []types.Interval `json:"working_hours"`
+	Earnings     int32            `json:"earnings,omitempty"`
+	Rating       int32            `json:"rating,omitempty"`
 }

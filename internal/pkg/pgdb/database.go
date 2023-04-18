@@ -19,6 +19,24 @@ type Database struct {
 
 type TransactionCallback func(ctx context.Context) error
 
+func (d *Database) ReadonlyTx(ctx context.Context, callback TransactionCallback) error {
+	tx, err := d.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = tx.Rollback(ctx)
+	}()
+
+	ctx = context.WithValue(ctx, txCtxKey{}, tx)
+
+	if err := callback(ctx); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (d *Database) Tx(ctx context.Context, callback TransactionCallback) error {
 	tx, err := d.pool.Begin(ctx)
 	if err != nil {
