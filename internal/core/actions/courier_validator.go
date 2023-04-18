@@ -1,4 +1,4 @@
-package courier
+package actions
 
 import (
 	"errors"
@@ -7,7 +7,7 @@ import (
 	"yandex-team.ru/bstask/internal/core/entities"
 )
 
-func Validate(courier *entities.Courier) error {
+func ValidateCourier(courier *entities.Courier) error {
 	if err := validateCourierType(courier); err != nil {
 		return err
 	}
@@ -47,5 +47,5 @@ func validateCourierRegions(courier *entities.Courier) error {
 }
 
 func validateCourierHours(courier *entities.Courier) error {
-	return nil // TODO: implement
+	return nil // TODO: implement me
 }

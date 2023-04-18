@@ -1,11 +1,11 @@
-package order
+package actions
 
 import (
 	"errors"
 	"yandex-team.ru/bstask/internal/core/entities"
 )
 
-func Validate(order *entities.Order) error {
+func ValidateOrder(order *entities.Order) error {
 	if err := validateHours(order); err != nil {
 		return err
 	}

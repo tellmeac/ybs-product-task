@@ -4,19 +4,37 @@ import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
+	"time"
 	"yandex-team.ru/bstask/internal/core/entities"
+	"yandex-team.ru/bstask/internal/pkg/types"
 )
+
+type OrderCreateParams struct {
+	Weight        float64
+	Region        int32
+	DeliveryHours []types.Interval
+	Cost          int32
+}
+
+type OrderSaveParams struct {
+	OrderID      int64
+	CourierID    int64
+	CompleteTime time.Time
+}
 
 type OrderMapper struct {
 	Storage *Storage
 }
 
-func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities.Order, error) {
-	rows, err := m.Storage.Database.Select(ctx,
-		sq.Select("*").From("orders").Limit(limit).Offset(offset))
+func (m *OrderMapper) executeQuery(ctx context.Context, query sq.Sqlizer) ([]entities.Order, error) {
+	rows, err := m.Storage.Database.QuerySq(ctx, query)
 	if err != nil {
 		return nil, err
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 	result := make([]entities.Order, 0)
 	for rows.Next() {
@@ -27,63 +45,61 @@ func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities
 
 		result = append(result, order)
 	}
+
 	return result, nil
 }
 
+func (m *OrderMapper) All(ctx context.Context, limit, offset uint64) ([]entities.Order, error) {
+	return m.executeQuery(ctx, sq.Select("*").From("orders").
+		PlaceholderFormat(sq.Dollar).
+		Limit(limit).Offset(offset))
+}
+
 func (m *OrderMapper) Get(ctx context.Context, id int64) (*entities.Order, error) {
-	rows, err := m.Storage.Database.Select(ctx,
-		sq.Select("*").From("orders").
-			Where(sq.Eq{
-				"id": id,
-			}))
+	result, err := m.executeQuery(ctx, sq.Select("*").From("orders").Where(sq.Eq{"id": id}))
 	if err != nil {
 		return nil, err
 	}
-
-	if !rows.Next() {
+	if len(result) == 0 {
 		return nil, nil
 	}
 
-	result, err := toOrder(rows)
-	return &result, err
+	return &result[0], nil
 }
 
-func (m *OrderMapper) Insert(ctx context.Context, orders []entities.Order) ([]entities.Order, error) {
-	builder := sq.Insert("orders").
+func (m *OrderMapper) Insert(ctx context.Context, params OrderCreateParams) (*entities.Order, error) {
+	result, err := m.executeQuery(ctx, sq.Insert("orders").
 		Columns("weight", "region", "delivery_hours", "cost").
+		Values(params.Weight, params.Region, params.DeliveryHours, params.Cost).
 		PlaceholderFormat(sq.Dollar).
-		Suffix("RETURNING id")
-
-	for i := range orders {
-		builder = builder.Values(orders[i].Weight, orders[i].Region, orders[i].DeliveryHours, orders[i].Cost)
-	}
-
-	rows, err := m.Storage.Database.Insert(ctx, builder)
+		Suffix("RETURNING *"))
 	if err != nil {
 		return nil, err
 	}
-
-	var ind, id int64
-	for rows.Next() {
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-
-		orders[ind].ID = id
+	if len(result) == 0 {
+		return nil, nil
 	}
 
-	return orders, nil
+	return &result[0], nil
 }
 
-func (m *OrderMapper) Update(ctx context.Context, orders []entities.Order) error {
-	err := m.Storage.Database.Tx(ctx, func(ctx context.Context) error {
-		// update only updatable fields (complete_time, courier_id) with returning other fields
-		return nil
-	})
+func (m *OrderMapper) Save(ctx context.Context, params OrderSaveParams) (*entities.Order, error) {
+	result, err := m.executeQuery(ctx, sq.Update("orders").
+		Where(sq.Eq{
+			"id":         params.OrderID,
+			"courier_id": params.CourierID, // TODO: what about complete time assertion ? (idempotency)
+		}).
+		Set("complete_time", params.CompleteTime).
+		PlaceholderFormat(sq.Dollar).
+		Suffix("RETURNING *"))
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return nil
+	if len(result) == 0 {
+		return nil, nil
+	}
+
+	return &result[0], nil
 }
 
 func toOrder(rows pgx.Rows) (entities.Order, error) {

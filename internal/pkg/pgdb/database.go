@@ -37,6 +37,20 @@ func (d *Database) Tx(ctx context.Context, callback TransactionCallback) error {
 	return tx.Commit(ctx)
 }
 
+func (d *Database) QuerySq(ctx context.Context, query sq.Sqlizer) (pgx.Rows, error) {
+	tx, withTransaction := transactionFromContext(ctx)
+
+	querySql, args, err := query.ToSql()
+	if err != nil {
+		return nil, err
+	}
+
+	if withTransaction {
+		return tx.Query(ctx, querySql, args...)
+	}
+	return d.pool.Query(ctx, querySql, args...)
+}
+
 func (d *Database) Select(ctx context.Context, query sq.SelectBuilder) (pgx.Rows, error) {
 	tx, withTransaction := transactionFromContext(ctx)
 

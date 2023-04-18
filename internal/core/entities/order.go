@@ -12,7 +12,7 @@ type Order struct {
 	DeliveryHours []types.Interval `json:"delivery_hours"`
 	Cost          int32            `json:"cost"`
 	CompletedTime *time.Time       `json:"completed_time,omitempty"`
-	CourierID     *int64
+	CourierID     *int64           `json:"-"`
 }
 
 type CompleteInfo struct {

@@ -5,73 +5,74 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/jackc/pgx/v5"
 	"yandex-team.ru/bstask/internal/core/entities"
+	"yandex-team.ru/bstask/internal/pkg/types"
 )
 
 type CourierMapper struct {
 	Storage *Storage
 }
 
-func (m CourierMapper) All(ctx context.Context, limit uint64, offset uint64) ([]entities.Courier, error) {
-	rows, err := m.Storage.Database.Select(ctx,
-		sq.Select("*").From("couriers").
-			Limit(limit).Offset(offset))
+type CourierCreateParams struct {
+	Type         entities.CourierType
+	Regions      []int32
+	WorkingHours []types.Interval
+}
+
+func (m *CourierMapper) executeQuery(ctx context.Context, query sq.Sqlizer) ([]entities.Courier, error) {
+	rows, err := m.Storage.Database.QuerySq(ctx, query)
 	if err != nil {
 		return nil, err
 	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	defer rows.Close()
 
 	result := make([]entities.Courier, 0)
 	for rows.Next() {
-		courier, err := toCourier(rows)
+		order, err := toCourier(rows)
 		if err != nil {
 			return nil, err
 		}
 
-		result = append(result, courier)
+		result = append(result, order)
 	}
+
 	return result, nil
 }
 
-func (m CourierMapper) Get(ctx context.Context, id int64) (*entities.Courier, error) {
-	rows, err := m.Storage.Database.Select(ctx, sq.Select("*").From("couriers").
-		Where(sq.Eq{
-			"id": id,
-		}))
+func (m *CourierMapper) All(ctx context.Context, limit uint64, offset uint64) ([]entities.Courier, error) {
+	return m.executeQuery(ctx, sq.Select("*").From("couriers").
+		PlaceholderFormat(sq.Dollar).
+		Limit(limit).Offset(offset))
+}
+
+func (m *CourierMapper) Get(ctx context.Context, id int64) (*entities.Courier, error) {
+	result, err := m.executeQuery(ctx, sq.Select("*").From("couriers").Where(sq.Eq{"id": id}))
 	if err != nil {
 		return nil, err
 	}
-
-	if !rows.Next() {
+	if len(result) == 0 {
 		return nil, nil
 	}
 
-	result, err := toCourier(rows)
-	return &result, err
+	return &result[0], nil
 }
 
-func (m CourierMapper) Insert(ctx context.Context, couriers []entities.Courier) ([]entities.Courier, error) {
-	builder := sq.Insert("couriers").
+func (m *CourierMapper) Insert(ctx context.Context, params CourierCreateParams) (*entities.Courier, error) {
+	result, err := m.executeQuery(ctx, sq.Insert("couriers").
 		Columns("courier_type", "regions", "working_hours").
+		Values(params.Type, params.Regions, params.WorkingHours).
 		PlaceholderFormat(sq.Dollar).
-		Suffix("RETURNING id")
-	for i := range couriers {
-		builder = builder.Values(couriers[i].Type, couriers[i].Regions, couriers[i].WorkingHours)
-	}
-
-	rows, err := m.Storage.Database.Insert(ctx, builder)
+		Suffix("RETURNING *"))
 	if err != nil {
 		return nil, err
 	}
-
-	var ind, id int64
-	for rows.Next() {
-		if err := rows.Scan(&id); err != nil {
-			return nil, err
-		}
-
-		couriers[ind].ID = id
+	if len(result) == 0 {
+		return nil, nil
 	}
 
-	return couriers, nil
+	return &result[0], nil
 }
 
 func toCourier(rows pgx.Rows) (entities.Courier, error) {
