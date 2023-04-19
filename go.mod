@@ -11,6 +11,7 @@ require (
 	github.com/samber/lo v1.38.1
 	github.com/spf13/viper v1.15.0
 	github.com/stretchr/testify v1.8.1
+	golang.org/x/time v0.3.0
 )
 
 require (

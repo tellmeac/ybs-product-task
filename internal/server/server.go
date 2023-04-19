@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"yandex-team.ru/bstask/internal/core"
 	"yandex-team.ru/bstask/internal/pkg/web"
+	"yandex-team.ru/bstask/internal/pkg/web/mw"
 	"yandex-team.ru/bstask/internal/server/handlers"
 )
 
@@ -45,7 +46,10 @@ func (app *App) initRoutes() {
 }
 
 func (app *App) mappedHandler(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {
+	rateMiddleware := mw.RateLimitPerSec(1) // NOTE: for each handler different middleware init
+
 	return func(ctx *gin.Context) {
+		rateMiddleware(ctx)
 		if err := handler(ctx, app.Repository); err != nil {
 			_ = ctx.AbortWithError(http.StatusInternalServerError, err)
 		}
