@@ -19,8 +19,6 @@ type ServerTestSuite struct {
 }
 
 func (s *ServerTestSuite) TestOrderPipeline() {
-	s.T().Parallel()
-
 	r, err := s.client.R().
 		SetBody(map[string]interface{}{
 			"orders": nil,
@@ -77,8 +75,6 @@ func (s *ServerTestSuite) TestOrderPipeline() {
 }
 
 func (s *ServerTestSuite) TestCourierPipeline() {
-	s.T().Parallel()
-
 	r, err := s.client.R().
 		SetBody(map[string]interface{}{
 			"couriers": []map[string]interface{}{
@@ -110,7 +106,25 @@ func (s *ServerTestSuite) TestCourierPipeline() {
 	require.NotEmpty(s.T(), couriersResponse.Couriers[0].ID)
 }
 
+func (s *ServerTestSuite) TestRateLimitMiddleware() {
+	for i := 0; i < 10; i++ {
+		r, err := s.client.R().Get("/couriers")
+		require.NoError(s.T(), err)
+		require.Equal(s.T(), http.StatusOK, r.StatusCode())
+	}
+
+	r, err := s.client.R().Get("/couriers")
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), http.StatusTooManyRequests, r.StatusCode())
+
+	r, err = s.client.R().Get("/orders")
+	require.NoError(s.T(), err)
+	require.Equal(s.T(), http.StatusOK, r.StatusCode())
+}
+
 func (s *ServerTestSuite) SetupTest() {
+	time.Sleep(time.Second)
+
 	s.ctx, s.cleanUpTest = context.WithTimeout(context.Background(), time.Second)
 
 	c := resty.New()
