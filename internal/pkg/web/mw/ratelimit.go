@@ -14,6 +14,5 @@ func RateLimitPerSec(requests int) gin.HandlerFunc {
 		if !rl.Allow() {
 			context.AbortWithStatus(http.StatusTooManyRequests)
 		}
-		context.Next()
 	}
 }
