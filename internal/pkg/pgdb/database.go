@@ -69,62 +69,6 @@ func (d *Database) QuerySq(ctx context.Context, query sq.Sqlizer) (pgx.Rows, err
 	return d.pool.Query(ctx, querySql, args...)
 }
 
-func (d *Database) Select(ctx context.Context, query sq.SelectBuilder) (pgx.Rows, error) {
-	tx, withTransaction := transactionFromContext(ctx)
-
-	querySql, args, err := query.PlaceholderFormat(sq.Dollar).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	if withTransaction {
-		return tx.Query(ctx, querySql, args...)
-	}
-	return d.pool.Query(ctx, querySql, args...)
-}
-
-func (d *Database) Update(ctx context.Context, query sq.UpdateBuilder) (pgx.Rows, error) {
-	tx, withTransaction := transactionFromContext(ctx)
-
-	querySql, args, err := query.PlaceholderFormat(sq.Dollar).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	if withTransaction {
-		return tx.Query(ctx, querySql, args...)
-	}
-	return d.pool.Query(ctx, querySql, args...)
-}
-
-func (d *Database) Insert(ctx context.Context, query sq.InsertBuilder) (pgx.Rows, error) {
-	tx, withTransaction := transactionFromContext(ctx)
-
-	querySql, args, err := query.PlaceholderFormat(sq.Dollar).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	if withTransaction {
-		return tx.Query(ctx, querySql, args...)
-	}
-	return d.pool.Query(ctx, querySql, args...)
-}
-
-func (d *Database) Delete(ctx context.Context, query sq.DeleteBuilder) (pgx.Rows, error) {
-	tx, withTransaction := transactionFromContext(ctx)
-
-	querySql, args, err := query.PlaceholderFormat(sq.Dollar).ToSql()
-	if err != nil {
-		return nil, err
-	}
-
-	if withTransaction {
-		return tx.Query(ctx, querySql, args...)
-	}
-	return d.pool.Query(ctx, querySql, args...)
-}
-
 func transactionFromContext(ctx context.Context) (pgx.Tx, bool) {
 	if tx := ctx.Value(txCtxKey{}); tx != nil {
 		return tx.(pgx.Tx), true
