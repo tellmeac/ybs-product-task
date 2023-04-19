@@ -46,7 +46,7 @@ func (app *App) initRoutes() {
 }
 
 func (app *App) mappedHandler(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {
-	rateMiddleware := mw.RateLimitPerSec(1) // NOTE: for each handler different middleware init
+	rateMiddleware := mw.RateLimitPerSec(10) // NOTE: for each handler different middleware init
 
 	return func(ctx *gin.Context) {
 		rateMiddleware(ctx)
