@@ -48,10 +48,11 @@ func (app *App) initRoutes() {
 }
 
 func (app *App) mappedHandler(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {
-	rateMiddleware := mw.RateLimitPerSec(10) // NOTE: for each handler different middleware init
+	rpsMw := mw.RateLimitPerSec(app.Repository.Config.RPS)
 
 	return func(ctx *gin.Context) {
-		rateMiddleware(ctx)
+		rpsMw(ctx)
+
 		if err := handler(ctx, app.Repository); err != nil {
 			_ = ctx.AbortWithError(http.StatusInternalServerError, err)
 		}

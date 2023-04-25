@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	RPS     int              `yaml:"rps"`
 	Server  web.ServerConfig `yaml:"server"`
 	Storage storage.Config   `yaml:"storage"`
 }

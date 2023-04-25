@@ -13,18 +13,6 @@ func WithConfigPath(p string) LoaderOption {
 	}
 }
 
-func WithEnvPrefix(prefix string) LoaderOption {
-	return func(v *viper.Viper) {
-		v.SetEnvPrefix(prefix)
-	}
-}
-
-func WithEnvKeyReplacement(oldnew ...string) LoaderOption {
-	return func(v *viper.Viper) {
-		v.SetEnvKeyReplacer(strings.NewReplacer(oldnew...))
-	}
-}
-
 func PrepareLoader(options ...LoaderOption) *viper.Viper {
 	v := viper.New()
 	v.AutomaticEnv()

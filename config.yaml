@@ -1,4 +1,5 @@
+rps: 10
 server:
   listen: ":8080"
 storage:
-  connectionStr: "postgres://postgres:postgres@localhost:5432/Lavka?sslmode=disable"
+  url: "postgres://postgres:postgres@localhost:5432/postgres?sslmode=disable"

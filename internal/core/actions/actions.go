@@ -75,11 +75,15 @@ func (a *Actions) CompleteOrder(ctx context.Context, requests []entities.Complet
 
 	err := a.storage.Database.Tx(ctx, func(ctx context.Context) error {
 		for _, r := range requests {
-			order, err := a.storage.Orders.Save(ctx, storage.OrderSaveParams{
-				OrderID:      r.OrderID,
-				CourierID:    r.CourierID,
-				CompleteTime: r.CompleteTime,
-			})
+			order, err := a.storage.Orders.Save(ctx,
+				storage.OrderFilterParams{
+					OrderID:   r.OrderID,
+					CourierID: &r.CourierID,
+				},
+				storage.OrderSaveParams{
+					CompleteTime: &r.CompleteTime,
+				},
+			)
 			if err != nil {
 				return err
 			}

@@ -2,12 +2,12 @@ package storage
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v4/pgxpool"
 	"yandex-team.ru/bstask/internal/pkg/pgdb"
 )
 
 type Config struct {
-	ConnectionStr string `yaml:"connectionStr"`
+	URL string `yaml:"url"`
 }
 
 type Storage struct {
@@ -25,7 +25,7 @@ func NewStorage(ctx context.Context, cfg Config) (*Storage, error) {
 		Config: cfg,
 	}
 
-	pool, err := pgxpool.New(ctx, cfg.ConnectionStr)
+	pool, err := pgxpool.Connect(ctx, cfg.URL)
 	if err != nil {
 		return nil, err
 	}

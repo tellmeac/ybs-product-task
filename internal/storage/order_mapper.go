@@ -3,7 +3,7 @@ package storage
 import (
 	"context"
 	sq "github.com/Masterminds/squirrel"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v4"
 	"time"
 	"yandex-team.ru/bstask/internal/core/entities"
 	"yandex-team.ru/bstask/internal/pkg/types"
@@ -18,8 +18,13 @@ type OrderCreateParams struct {
 
 type OrderSaveParams struct {
 	OrderID      int64
-	CourierID    int64
-	CompleteTime time.Time
+	CourierID    *int64
+	CompleteTime *time.Time
+}
+
+type OrderFilterParams struct {
+	OrderID   int64
+	CourierID *int64
 }
 
 type OrderMapper struct {
@@ -100,15 +105,27 @@ func (m *OrderMapper) Insert(ctx context.Context, params OrderCreateParams) (*en
 	return &result[0], nil
 }
 
-func (m *OrderMapper) Save(ctx context.Context, params OrderSaveParams) (*entities.Order, error) {
-	result, err := m.executeQuery(ctx, sq.Update("orders").
+func (m *OrderMapper) Save(
+	ctx context.Context, filter OrderFilterParams, params OrderSaveParams,
+) (*entities.Order, error) {
+	query := sq.Update("orders").
 		PlaceholderFormat(sq.Dollar).
-		Where(sq.Eq{
-			"id":         params.OrderID,
-			"courier_id": params.CourierID, // TODO: what about complete time assertion ? (idempotency)
-		}).
-		Set("completed_time", params.CompleteTime).
-		Suffix("RETURNING *"))
+		Where(sq.Eq{"id": filter.OrderID}).
+		Suffix("RETURNING *")
+
+	if filter.CourierID != nil {
+		query = query.Where(sq.Eq{"courier_id": filter.CourierID})
+	}
+
+	if params.CourierID != nil {
+		query = query.Set("courier_id", *params.CourierID)
+	}
+
+	if params.CompleteTime != nil {
+		query = query.Set("completed_time", *params.CompleteTime)
+	}
+
+	result, err := m.executeQuery(ctx, query)
 	if err != nil {
 		return nil, err
 	}
