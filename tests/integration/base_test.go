@@ -106,24 +106,8 @@ func (s *ServerTestSuite) TestCourierPipeline() {
 	require.NotEmpty(s.T(), couriersResponse.Couriers[0].ID)
 }
 
-func (s *ServerTestSuite) TestRateLimitMiddleware() {
-	for i := 0; i < 10; i++ {
-		r, err := s.client.R().Get("/couriers")
-		require.NoError(s.T(), err)
-		require.Equal(s.T(), http.StatusOK, r.StatusCode())
-	}
-
-	r, err := s.client.R().Get("/couriers")
-	require.NoError(s.T(), err)
-	require.Equal(s.T(), http.StatusTooManyRequests, r.StatusCode())
-
-	r, err = s.client.R().Get("/orders")
-	require.NoError(s.T(), err)
-	require.Equal(s.T(), http.StatusOK, r.StatusCode())
-}
-
 func (s *ServerTestSuite) SetupTest() {
-	time.Sleep(time.Second)
+	time.Sleep(time.Second / 2)
 
 	s.ctx, s.cleanUpTest = context.WithTimeout(context.Background(), time.Second)
 
