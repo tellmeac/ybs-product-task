@@ -4,9 +4,11 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"github.com/avast/retry-go/v4"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	"log"
+	"time"
 	"yandex-team.ru/bstask/internal/core"
 	"yandex-team.ru/bstask/internal/pkg/config"
 	"yandex-team.ru/bstask/internal/server"
@@ -42,20 +44,31 @@ func main() {
 }
 
 func UpMigrations(cfg *core.Config) {
-	db, err := sql.Open("pgx", cfg.Storage.URL)
-	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	err := retry.Do(func() error {
+		db, err := sql.Open("pgx", cfg.Storage.URL)
+		if err != nil {
+			return err
+		}
+
+		driver, err := postgres.WithInstance(db, &postgres.Config{})
+		if err != nil {
+			return err
+		}
+
+		m, err := migrate.NewWithDatabaseInstance(
+			"file://migrations",
+			"postgres", driver)
+		if err != nil {
+			return err
+		}
+
+		if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+			return err
+		}
+
+		return nil
+	}, retry.Attempts(4), retry.Delay(2*time.Second))
 	if err != nil {
 		log.Fatalf(err.Error())
-	}
-
-	m, err := migrate.NewWithDatabaseInstance(
-		"file://migrations",
-		"postgres", driver)
-	if err != nil {
-		log.Fatalf(err.Error())
-	}
-
-	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-		log.Fatalf("Failed to apply migrations: %s", err)
 	}
 }

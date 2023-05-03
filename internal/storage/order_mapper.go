@@ -64,8 +64,8 @@ func (m *OrderMapper) Find(ctx context.Context, params OrderFindParams) ([]entit
 		PlaceholderFormat(sq.Dollar).
 		Where(sq.And{
 			sq.Eq{"courier_id": params.CourierID},
-			sq.LtOrEq{"completed_time": params.To},
 			sq.GtOrEq{"completed_time": params.From},
+			sq.Lt{"completed_time": params.To},
 		}))
 }
 

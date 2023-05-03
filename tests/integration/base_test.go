@@ -19,24 +19,22 @@ type ServerTestSuite struct {
 }
 
 func (s *ServerTestSuite) TestOrderPipeline() {
-	r, err := s.client.R().
-		SetBody(map[string]interface{}{
-			"orders": nil,
-		}).Post("/orders")
+	r, err := s.client.R().SetBody(map[string]interface{}{
+		"orders": nil,
+	}).Post("/orders")
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusBadRequest, r.StatusCode(),
 		"For POST /orders with empty order list should be 400")
 
-	r, err = s.client.R().
-		SetBody(map[string]interface{}{
-			"orders": []map[string]interface{}{
-				{
-					"weight":         25.5,
-					"delivery_hours": nil,
-					"cost":           500,
-				},
+	r, err = s.client.R().SetBody(map[string]interface{}{
+		"orders": []map[string]interface{}{
+			{
+				"weight":         25.5,
+				"delivery_hours": nil,
+				"cost":           500,
 			},
-		}).Post("/orders")
+		},
+	}).Post("/orders")
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusBadRequest, r.StatusCode(),
 		"For POST /orders with empty delivery_hours field should be 400")
@@ -49,16 +47,15 @@ func (s *ServerTestSuite) TestOrderPipeline() {
 		Cost          int32    `json:"cost"`
 	}
 
-	r, err = s.client.R().
-		SetBody(map[string]interface{}{
-			"orders": []map[string]interface{}{
-				{
-					"weight":         25.5,
-					"delivery_hours": []string{"12:00-14:00", "16:00-20:00"},
-					"cost":           500,
-				},
+	r, err = s.client.R().SetBody(map[string]interface{}{
+		"orders": []map[string]interface{}{
+			{
+				"weight":         25.5,
+				"delivery_hours": []string{"12:00-14:00", "16:00-20:00"},
+				"cost":           500,
 			},
-		}).SetResult(&orders).Post("/orders")
+		},
+	}).SetResult(&orders).Post("/orders")
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusOK, r.StatusCode(),
 		"Valid POST /orders")
