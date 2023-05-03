@@ -35,6 +35,7 @@ func (s *ServerTestSuite) TestOrderPipeline() {
 			},
 		},
 	}).Post("/orders")
+	s.T().Log(string(r.Body()))
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusBadRequest, r.StatusCode(),
 		"For POST /orders with empty delivery_hours field should be 400")
@@ -56,6 +57,7 @@ func (s *ServerTestSuite) TestOrderPipeline() {
 			},
 		},
 	}).SetResult(&orders).Post("/orders")
+	s.T().Log(string(r.Body()))
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusOK, r.StatusCode(),
 		"Valid POST /orders")
@@ -64,6 +66,7 @@ func (s *ServerTestSuite) TestOrderPipeline() {
 
 	orders = nil
 	r, err = s.client.R().SetResult(&orders).Get("/orders")
+	s.T().Log(string(r.Body()))
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusOK, r.StatusCode(),
 		"Valid GET /orders with some values")
@@ -82,6 +85,7 @@ func (s *ServerTestSuite) TestCourierPipeline() {
 				},
 			},
 		}).Post("/couriers")
+	s.T().Log(string(r.Body()))
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusOK, r.StatusCode(),
 		"Valid POST /couriers request")
@@ -96,6 +100,7 @@ func (s *ServerTestSuite) TestCourierPipeline() {
 	}
 
 	r, err = s.client.R().SetResult(&couriersResponse).Get("/couriers")
+	s.T().Log(string(r.Body()))
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusOK, r.StatusCode(),
 		"Valid GET /couriers with some values")
