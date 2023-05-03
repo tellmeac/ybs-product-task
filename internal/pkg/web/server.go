@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// ServerConfig represents configuration for Server.
 type ServerConfig struct {
 	Listen            string        `config:"listen"`
 	DrainInterval     time.Duration `yaml:"drainInterval"`
@@ -22,6 +23,7 @@ type ServerConfig struct {
 	} `yaml:"gzip,omitempty"`
 }
 
+// Server is an interface for web http server.
 type Server interface {
 	Start(ctx context.Context) error
 	Stop(ctx context.Context) error
@@ -31,6 +33,7 @@ type Server interface {
 
 var _ Server = (*BaseServer)(nil)
 
+// BaseServer is a default implementation of Server interface.
 type BaseServer struct {
 	engine     *gin.Engine
 	httpServer *http.Server
@@ -40,6 +43,7 @@ type BaseServer struct {
 	isNotReady int32
 }
 
+// NewServer returns new *BaseServer.
 func NewServer(config ServerConfig, handler *gin.Engine) *BaseServer {
 	s := &BaseServer{
 		engine: handler,

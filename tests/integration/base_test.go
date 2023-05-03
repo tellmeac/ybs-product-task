@@ -22,6 +22,7 @@ func (s *ServerTestSuite) TestOrderPipeline() {
 	r, err := s.client.R().SetBody(map[string]interface{}{
 		"orders": nil,
 	}).Post("/orders")
+	s.T().Log(string(r.Body()))
 	require.NoError(s.T(), err)
 	require.Equalf(s.T(), http.StatusBadRequest, r.StatusCode(),
 		"For POST /orders with empty order list should be 400")
