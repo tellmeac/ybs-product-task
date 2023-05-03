@@ -21,12 +21,16 @@ func GetCourierMeta(
 		return &meta
 	}
 
-	for i := range completedOrders {
-		meta.Earnings += completedOrders[i].Cost
-	}
-	meta.Earnings *= CourierEarningFactor(courier)
+	var earnings, rating int32 = 0, 0
+	meta.Earnings = &earnings
+	meta.Rating = &rating
 
-	meta.Rating = int32(len(completedOrders)) / int32(to.Sub(from).Hours()) * CourierRatingFactor(courier)
+	for i := range completedOrders {
+		*meta.Earnings += completedOrders[i].Cost
+	}
+	*meta.Earnings *= CourierEarningFactor(courier)
+
+	*meta.Rating = int32(len(completedOrders)) / int32(to.Sub(from).Hours()) * CourierRatingFactor(courier)
 
 	return &meta
 }

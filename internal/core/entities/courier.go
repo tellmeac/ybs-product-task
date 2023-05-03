@@ -26,6 +26,6 @@ type CourierMeta struct {
 	Type         CourierType      `json:"courier_type"`
 	Regions      []int32          `json:"regions"`
 	WorkingHours []types.Interval `json:"working_hours"`
-	Earnings     int32            `json:"earnings,omitempty"`
-	Rating       int32            `json:"rating,omitempty"`
+	Earnings     *int32           `json:"earnings,omitempty"`
+	Rating       *int32           `json:"rating,omitempty"`
 }
