@@ -21,7 +21,7 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindQuery(&queryParams); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -41,7 +41,7 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 func GetCourier(ctx *gin.Context, r *core.Repository) error {
 	courierId, err := strconv.ParseInt(ctx.Param("courier_id"), 10, 0)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -69,7 +69,7 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -83,7 +83,7 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := r.Actions.ValidateCreateCouriers(createCouriers); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -101,7 +101,7 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 func GetCourierMetaInfo(ctx *gin.Context, r *core.Repository) error {
 	courierId, err := strconv.ParseInt(ctx.Param("courier_id"), 10, 0)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -110,7 +110,7 @@ func GetCourierMetaInfo(ctx *gin.Context, r *core.Repository) error {
 		EndDate   time.Time `form:"endDate" time_format:"2006-01-02" binding:"gtfield=StartDate"`
 	}
 	if err := ctx.BindQuery(&queryParams); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 

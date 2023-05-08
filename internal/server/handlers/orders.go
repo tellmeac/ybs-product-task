@@ -22,7 +22,7 @@ func GetOrders(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindQuery(&queryParams); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -38,7 +38,7 @@ func GetOrders(ctx *gin.Context, r *core.Repository) error {
 func GetOrder(ctx *gin.Context, r *core.Repository) error {
 	orderId, err := strconv.ParseInt(ctx.Param("order_id"), 10, 0)
 	if err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -67,7 +67,7 @@ func CreateOrder(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -82,7 +82,7 @@ func CreateOrder(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := r.Actions.ValidateCreateOrders(createOrders); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
@@ -100,14 +100,14 @@ func CompleteOrder(ctx *gin.Context, r *core.Repository) error {
 		CompleteInfo []entities.CompleteInfo `json:"complete_info"`
 	}
 	if err := ctx.BindJSON(&request); err != nil {
-		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
 
 	orders, err := r.Actions.CompleteOrder(ctx, request.CompleteInfo)
 	if err != nil {
 		if errors.Is(err, actions.ErrCompleteOrder) {
-			ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{Message: err.Error()})
+			ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 			return nil
 		}
 

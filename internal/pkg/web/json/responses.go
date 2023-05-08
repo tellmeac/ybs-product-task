@@ -1,7 +1,5 @@
 package json
 
-type BadRequestResponse struct {
-	Message string `json:"message,omitempty"`
-}
+type BadRequestResponse struct{}
 
 type NotFoundResponse struct{}
