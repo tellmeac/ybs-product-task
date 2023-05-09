@@ -29,7 +29,12 @@ func main() {
 		log.Fatalf("Failed to parse config: %s", err)
 	}
 
-	UpMigrations(cfg)
+	err = retry.Do(func() error {
+		return UpMigrations(cfg)
+	}, retry.Attempts(4), retry.Delay(2*time.Second))
+	if err != nil {
+		log.Fatalf(err.Error())
+	}
 
 	repository, err := core.NewRepository(ctx, cfg)
 	if err != nil {
@@ -43,32 +48,28 @@ func main() {
 	}
 }
 
-func UpMigrations(cfg *core.Config) {
-	err := retry.Do(func() error {
-		db, err := sql.Open("pgx", cfg.Storage.URL)
-		if err != nil {
-			return err
-		}
-
-		driver, err := postgres.WithInstance(db, &postgres.Config{})
-		if err != nil {
-			return err
-		}
-
-		m, err := migrate.NewWithDatabaseInstance(
-			"file://migrations",
-			"postgres", driver)
-		if err != nil {
-			return err
-		}
-
-		if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
-			return err
-		}
-
-		return nil
-	}, retry.Attempts(4), retry.Delay(2*time.Second))
+func UpMigrations(cfg *core.Config) error {
+	db, err := sql.Open("pgx", cfg.Storage.URL)
 	if err != nil {
-		log.Fatalf(err.Error())
+		return err
 	}
+
+	driver, err := postgres.WithInstance(db, &postgres.Config{})
+	if err != nil {
+		return err
+	}
+
+	m, err := migrate.NewWithDatabaseInstance(
+		"file://migrations",
+		"postgres", driver)
+	if err != nil {
+		return err
+	}
+
+	if err := m.Up(); err != nil && !errors.Is(err, migrate.ErrNoChange) {
+		return err
+	}
+
+	return nil
+
 }
