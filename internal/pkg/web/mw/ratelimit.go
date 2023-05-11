@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// RateLimitPerSec returns middleware to limit requests.
-func RateLimitPerSec(requests int) gin.HandlerFunc {
-	rl := rate.NewLimiter(rate.Every(time.Second), requests)
+// RateLimit returns middleware to limit requests.
+func RateLimit(requestsCount int, d time.Duration) gin.HandlerFunc {
+	rl := rate.NewLimiter(rate.Every(d), requestsCount)
 
 	return func(context *gin.Context) {
 		if !rl.Allow() {

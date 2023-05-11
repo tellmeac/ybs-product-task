@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"github.com/gin-gonic/gin"
+	"go.uber.org/zap"
 	"net/http"
 	"strconv"
 	"time"
@@ -21,6 +23,7 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindQuery(&queryParams); err != nil {
+		zap.L().Debug("Get couriers", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
@@ -41,6 +44,7 @@ func GetCouriers(ctx *gin.Context, r *core.Repository) error {
 func GetCourier(ctx *gin.Context, r *core.Repository) error {
 	courierId, err := strconv.ParseInt(ctx.Param("courier_id"), 10, 0)
 	if err != nil {
+		zap.L().Debug("Get courier", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
@@ -69,6 +73,7 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := ctx.BindJSON(&request); err != nil {
+		zap.L().Debug("Create courier", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
@@ -83,6 +88,7 @@ func CreateCourier(ctx *gin.Context, r *core.Repository) error {
 	}
 
 	if err := r.Actions.ValidateCreateCouriers(createCouriers); err != nil {
+		zap.L().Debug("Validate create couriers request", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
@@ -110,6 +116,7 @@ func GetCourierMetaInfo(ctx *gin.Context, r *core.Repository) error {
 		EndDate   time.Time `form:"endDate" time_format:"2006-01-02" binding:"gtfield=StartDate"`
 	}
 	if err := ctx.BindQuery(&queryParams); err != nil {
+		zap.L().Debug("Get courier meta info", zap.Error(err))
 		ctx.JSON(http.StatusBadRequest, json.BadRequestResponse{})
 		return nil
 	}
@@ -117,6 +124,12 @@ func GetCourierMetaInfo(ctx *gin.Context, r *core.Repository) error {
 	result, err := r.Actions.GetCourierMetaInfo(ctx, courierId, queryParams.StartDate, queryParams.EndDate)
 	if err != nil {
 		return err
+	}
+
+	// NOTE: 404 ответ не предусмотрен спецификацией.
+	if result == nil {
+		zap.L().Error("Courier meta: requested courier was not found")
+		return errors.New("requested courier was not found")
 	}
 
 	ctx.JSON(http.StatusOK, result)

@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/gin-gonic/gin"
 	"net/http"
+	"time"
 	"yandex-team.ru/bstask/internal/core"
 	"yandex-team.ru/bstask/internal/pkg/web"
 	"yandex-team.ru/bstask/internal/pkg/web/mw"
@@ -46,7 +47,7 @@ func (app *App) initRoutes() {
 }
 
 func (app *App) mappedHandler(handler func(*gin.Context, *core.Repository) error) gin.HandlerFunc {
-	rpsMw := mw.RateLimitPerSec(app.Repository.Config.RPS)
+	rpsMw := mw.RateLimit(app.Repository.Config.RPS, time.Second)
 
 	return func(ctx *gin.Context) {
 		rpsMw(ctx)

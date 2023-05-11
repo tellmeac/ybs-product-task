@@ -71,7 +71,7 @@ func (a *Actions) CreateOrders(ctx context.Context, requests []entities.Order) (
 }
 
 func (a *Actions) CompleteOrder(ctx context.Context, requests []entities.CompleteInfo) ([]entities.Order, error) {
-	result := make([]entities.Order, 0)
+	result := make([]entities.Order, 0, len(requests))
 
 	err := a.storage.Database.Tx(ctx, func(ctx context.Context) error {
 		for _, r := range requests {
@@ -152,7 +152,7 @@ func (a *Actions) GetCourier(ctx context.Context, id int64) (*entities.Courier, 
 }
 
 func (a *Actions) GetCourierMetaInfo(
-	ctx context.Context, courierId int64, from, to time.Time,
+	ctx context.Context, courierId int64, startDate, endDate time.Time,
 ) (*entities.CourierMeta, error) {
 	var result *entities.CourierMeta
 	err := a.storage.Database.ReadonlyTx(ctx, func(ctx context.Context) error {
@@ -165,15 +165,15 @@ func (a *Actions) GetCourierMetaInfo(
 		}
 
 		orders, err := a.storage.Orders.Find(ctx, storage.OrderFindParams{
-			From:      from,
-			To:        to,
+			From:      startDate,
+			To:        endDate,
 			CourierID: courier.ID,
 		})
 		if err != nil {
 			return err
 		}
 
-		result = meta.GetCourierMeta(courier, orders, from, to)
+		result = meta.GetCourierMeta(courier, orders, startDate, endDate)
 
 		return nil
 	})
