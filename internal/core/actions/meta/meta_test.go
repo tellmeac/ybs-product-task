@@ -47,8 +47,8 @@ func TestGetCourierMeta(t *testing.T) {
 			CompletedOrders: manyOrdersWith(100, 24),
 			Expected: entities.CourierMeta{
 				Type:     entities.AutoCourier,
-				Earnings: 9600, // (100 * 24) * 4;
-				Rating:   1,    // total two completed orders in one requested day;
+				Earnings: ref(int32(9600)), // (100 * 24) * 4;
+				Rating:   ref(int32(1)),    // total two completed orders in one requested day;
 			},
 			From: date(2023, 4, 17),
 			To:   date(2023, 4, 18),
@@ -59,8 +59,8 @@ func TestGetCourierMeta(t *testing.T) {
 			CompletedOrders: manyOrdersWith(100, 24),
 			Expected: entities.CourierMeta{
 				Type:     entities.FootCourier,
-				Earnings: 4800, // (100 * 24) * 2;
-				Rating:   3,    // total two completed orders in one requested day;
+				Earnings: ref(int32(4800)), // (100 * 24) * 2;
+				Rating:   ref(int32(3)),    // total two completed orders in one requested day;
 			},
 			From: date(2023, 4, 17),
 			To:   date(2023, 4, 18),
@@ -71,8 +71,8 @@ func TestGetCourierMeta(t *testing.T) {
 			CompletedOrders: manyOrdersWith(100, 24),
 			Expected: entities.CourierMeta{
 				Type:     entities.AutoCourier,
-				Earnings: 9600, // (200 + 300) * 4;
-				Rating:   0,    // total two completed orders in two days;
+				Earnings: ref(int32(9600)), // (200 + 300) * 4;
+				Rating:   ref(int32(0)),    // total two completed orders in two days;
 			},
 			From: date(2023, 4, 18),
 			To:   date(2023, 4, 20),
@@ -84,4 +84,8 @@ func TestGetCourierMeta(t *testing.T) {
 			require.True(t, reflect.DeepEqual(tc.Expected, *got))
 		})
 	}
+}
+
+func ref[T any](v T) *T {
+	return &v
 }
